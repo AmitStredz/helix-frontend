@@ -1,42 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Crypto/Web3 Design System - Dark theme with modern gradients */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Dark theme base colors */
+    --background: 222 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Glass card effects */
+    --card: 222 84% 6%;
+    --card-foreground: 210 40% 98%;
+    --card-glass: 222 84% 8%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 222 84% 6%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
+    /* Crypto brand colors - Purple/Blue theme */
+    --primary: 266 83% 58%;
     --primary-foreground: 210 40% 98%;
+    --primary-glow: 266 83% 68%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217 32% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 217 32% 17.5%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Electric blue accent */
+    --accent: 193 98% 55%;
+    --accent-foreground: 222 84% 4.9%;
+    --accent-glow: 193 98% 65%;
 
-    --destructive: 0 84.2% 60.2%;
+    /* Success/Error colors */
+    --success: 142 71% 45%;
+    --success-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 217 32% 17.5%;
+    --input: 217 32% 17.5%;
+    --ring: 266 83% 58%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Gradient definitions */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-glow)));
+    --gradient-card: linear-gradient(135deg, hsl(var(--card)), hsl(var(--card-glass)));
+    --gradient-hero: linear-gradient(135deg, hsl(222 84% 4.9%), hsl(222 84% 6%), hsl(266 83% 8%));
+    
+    /* Glow effects */
+    --glow-primary: 0 0 40px hsl(var(--primary) / 0.3);
+    --glow-accent: 0 0 40px hsl(var(--accent) / 0.3);
+    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.12);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +125,70 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+    background: var(--gradient-hero);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Glass card component */
+  .glass-card {
+    @apply bg-card/40 backdrop-blur-xl border border-white/10 rounded-xl;
+    box-shadow: var(--shadow-glass);
+  }
+  
+  /* Gradient button variants */
+  .btn-gradient-primary {
+    background: var(--gradient-primary);
+    @apply text-primary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-300;
+    box-shadow: var(--glow-primary);
+  }
+  
+  .btn-gradient-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-primary), 0 10px 25px hsl(var(--primary) / 0.4);
+  }
+  
+  .btn-gradient-accent {
+    background: var(--gradient-accent);
+    @apply text-accent-foreground font-medium px-6 py-3 rounded-lg transition-all duration-300;
+    box-shadow: var(--glow-accent);
+  }
+  
+  .btn-gradient-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-accent), 0 10px 25px hsl(var(--accent) / 0.4);
+  }
+  
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+  
+  .glow-accent {
+    box-shadow: var(--glow-accent);
+  }
+  
+  /* Animated gradient backgrounds */
+  .animated-gradient {
+    background: linear-gradient(-45deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary-glow)), hsl(var(--accent-glow)));
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+  }
+  
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-spring {
+    transition: var(--transition-spring);
   }
 }

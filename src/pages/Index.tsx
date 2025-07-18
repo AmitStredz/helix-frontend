@@ -1,12 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { Navbar } from '@/components/Navbar';
+import { Hero } from '@/components/Hero';
+import { Dashboard } from '@/components/Dashboard';
+import { VaultManagement } from '@/components/VaultManagement';
+import { Trading } from '@/components/Trading';
+import { AIChat } from '@/components/AIChat';
 
 const Index = () => {
+  const [activeSection, setActiveSection] = useState('hero');
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'vaults':
+        return <VaultManagement />;
+      case 'trade':
+        return <Trading />;
+      case 'analytics':
+        return <AIChat />;
+      default:
+        return <Hero onSectionChange={setActiveSection} />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen">
+      <Navbar activeSection={activeSection} onSectionChange={setActiveSection} />
+      {renderSection()}
     </div>
   );
 };
