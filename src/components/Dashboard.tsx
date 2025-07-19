@@ -11,10 +11,15 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Plus,
-  Settings
+  Settings,
+  AlertCircle
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { AnimatedText, CountingNumber, TypewriterText } from './AnimatedText';
+import { FloatingElements, PulsingOrb } from './FloatingElements';
 
 export function Dashboard() {
+  const { user } = useAuth();
   const portfolioData = {
     totalValue: 125847.23,
     totalChange: 12.45,
@@ -39,12 +44,66 @@ export function Dashboard() {
     }).format(amount);
   };
 
+  // Show vault connection prompt if user not connected to vault
+  if (user && !user.isConnectedToVault) {
+    return (
+      <div className="min-h-screen pt-20 pb-12 relative overflow-hidden">
+        <FloatingElements />
+        <PulsingOrb className="top-20 left-20" />
+        <PulsingOrb className="bottom-20 right-20" />
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center space-y-8">
+            <div className="space-y-4">
+              <AlertCircle className="w-16 h-16 mx-auto text-primary floating-element" />
+              <h1 className="text-4xl font-bold text-slide-up">
+                <TypewriterText text="Vault Connection Required" />
+              </h1>
+              <p className="text-xl text-muted-foreground text-slide-up">
+                Connect to a vault to access your dashboard and start earning yields
+              </p>
+            </div>
+            
+            <Card className="glass-card max-w-md mx-auto p-8">
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-2">Get Started</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Create or connect to an existing vault to begin managing your crypto assets
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button className="w-full btn-gradient-primary" size="lg">
+                    Create New Vault
+                  </Button>
+                  <Button variant="outline" className="w-full" size="lg">
+                    Connect to Existing Vault
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen pt-20 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-20 pb-12 relative overflow-hidden">
+      <FloatingElements />
+      <PulsingOrb className="top-20 left-20" />
+      <PulsingOrb className="bottom-40 right-40" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Portfolio Dashboard</h1>
+        <div className="mb-8 text-slide-up">
+          <h1 className="text-3xl font-bold mb-2">
+            <AnimatedText 
+              texts={["Portfolio Dashboard", "Investment Hub", "Yield Management"]} 
+              className="bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent"
+            />
+          </h1>
           <p className="text-muted-foreground">Track your crypto investments and yields</p>
         </div>
 
@@ -60,7 +119,11 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold mb-1">
-                {formatCurrency(portfolioData.totalValue)}
+                <CountingNumber 
+                  target={portfolioData.totalValue} 
+                  prefix="$" 
+                  className="text-primary"
+                />
               </div>
               <div className="flex items-center gap-1 text-sm">
                 {portfolioData.totalChange > 0 ? (
@@ -86,7 +149,10 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold mb-1">
-                {portfolioData.vaults.length}
+                <CountingNumber 
+                  target={portfolioData.vaults.length} 
+                  className="text-primary"
+                />
               </div>
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Zap className="w-4 h-4" />

@@ -16,11 +16,16 @@ import {
   DollarSign,
   Percent,
   Users,
-  Activity
+  Activity,
+  AlertCircle
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/contexts/AuthContext';
+import { TypewriterText } from './AnimatedText';
+import { FloatingElements, PulsingOrb } from './FloatingElements';
 
 export function VaultManagement() {
+  const { user } = useAuth();
   const [selectedVault, setSelectedVault] = useState<string>('');
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -91,12 +96,73 @@ export function VaultManagement() {
     }).format(amount);
   };
 
+  // Show vault connection prompt if user not connected to vault
+  if (user && !user.isConnectedToVault) {
+    return (
+      <div className="min-h-screen pt-20 pb-12 relative overflow-hidden">
+        <FloatingElements />
+        <PulsingOrb className="top-20 left-20" />
+        <PulsingOrb className="bottom-20 right-20" />
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center space-y-8">
+            <div className="space-y-4">
+              <Shield className="w-16 h-16 mx-auto text-primary floating-element" />
+              <h1 className="text-4xl font-bold text-slide-up">
+                <TypewriterText text="Create Your First Vault" />
+              </h1>
+              <p className="text-xl text-muted-foreground text-slide-up">
+                Set up a secure vault to start earning yields on your crypto assets
+              </p>
+            </div>
+            
+            <Card className="glass-card max-w-lg mx-auto p-8">
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-2">Choose Your Strategy</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Select a yield strategy that matches your risk tolerance
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  {['Low Risk - Stable Yields', 'Medium Risk - Balanced', 'High Risk - Maximum Returns'].map((strategy, index) => (
+                    <Button 
+                      key={index}
+                      variant="outline" 
+                      className="w-full h-auto p-4 text-left hover:bg-primary/10"
+                    >
+                      <div>
+                        <div className="font-medium">{strategy}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {index === 0 && '8-12% APY'}
+                          {index === 1 && '12-18% APY'}
+                          {index === 2 && '18-35% APY'}
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen pt-20 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-20 pb-12 relative overflow-hidden">
+      <FloatingElements />
+      <PulsingOrb className="top-20 left-20" />
+      <PulsingOrb className="bottom-40 right-40" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Vault Management</h1>
+        <div className="mb-8 text-slide-up">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+            Vault Management
+          </h1>
           <p className="text-muted-foreground">Create, manage, and optimize your crypto vaults</p>
         </div>
 

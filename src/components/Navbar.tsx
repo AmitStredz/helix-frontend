@@ -3,6 +3,7 @@ import { ConnectWallet } from './ConnectWallet';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: 'dashboard' },
@@ -18,6 +19,7 @@ interface NavbarProps {
 
 export function Navbar({ activeSection = 'hero', onSectionChange }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/10">
@@ -25,10 +27,10 @@ export function Navbar({ activeSection = 'hero', onSectionChange }: NavbarProps)
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center pulse-glow">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
               CryptoVault
             </span>
           </div>
@@ -44,7 +46,7 @@ export function Navbar({ activeSection = 'hero', onSectionChange }: NavbarProps)
             >
               Home
             </button>
-            {navigation.map((item) => (
+            {user && navigation.map((item) => (
               <button
                 key={item.name}
                 onClick={() => onSectionChange?.(item.href)}
@@ -92,7 +94,7 @@ export function Navbar({ activeSection = 'hero', onSectionChange }: NavbarProps)
             >
               Home
             </button>
-            {navigation.map((item) => (
+            {user && navigation.map((item) => (
               <button
                 key={item.name}
                 onClick={() => {

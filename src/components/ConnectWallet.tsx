@@ -1,57 +1,41 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Wallet, ChevronDown, Copy, ExternalLink, LogOut } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ConnectWalletProps {
   className?: string;
 }
 
 export function ConnectWallet({ className }: ConnectWalletProps) {
-  const [isConnected, setIsConnected] = useState(false);
-  const [address, setAddress] = useState('');
-  const [balance, setBalance] = useState('0.00');
-
-  const handleConnect = async () => {
-    // Dummy connection logic
-    const dummyAddress = '0x742d35Cc6484C312B5c4e0bD9e6dF2f00FB7e88B';
-    const dummyBalance = '2.4567';
-    
-    setAddress(dummyAddress);
-    setBalance(dummyBalance);
-    setIsConnected(true);
-  };
-
-  const handleDisconnect = () => {
-    setIsConnected(false);
-    setAddress('');
-    setBalance('0.00');
-  };
+  const { user, isConnecting, connectWallet, disconnectWallet } = useAuth();
 
   const copyAddress = () => {
-    navigator.clipboard.writeText(address);
+    if (user?.address) {
+      navigator.clipboard.writeText(user.address);
+    }
   };
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
-  if (!isConnected) {
+  if (!user) {
     return (
       <Button 
-        variant="connect" 
+        variant="outline" 
         size="lg" 
-        onClick={handleConnect}
-        className={className}
+        onClick={connectWallet}
+        disabled={isConnecting}
+        className={`${className} border-primary text-primary hover:bg-primary hover:text-primary-foreground`}
       >
-        <Wallet className="w-4 h-4" />
-        Connect Wallet
+        <Wallet className="w-4 h-4 mr-2" />
+        {isConnecting ? 'Connecting...' : 'Connect Wallet'}
       </Button>
     );
   }
@@ -60,13 +44,13 @@ export function ConnectWallet({ className }: ConnectWalletProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant="glass" 
+          variant="outline" 
           size="lg" 
-          className={className}
+          className={`${className} border-primary/20 bg-primary/10 text-foreground hover:bg-primary/20`}
         >
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-            <span className="font-mono">{formatAddress(address)}</span>
+            <span className="font-mono">{formatAddress(user.address)}</span>
             <ChevronDown className="w-4 h-4" />
           </div>
         </Button>
@@ -81,10 +65,15 @@ export function ConnectWallet({ className }: ConnectWalletProps) {
               <span className="text-xs text-success">Connected</span>
             </div>
           </div>
-          <div className="font-mono text-sm">{formatAddress(address)}</div>
+          <div className="font-mono text-sm">{formatAddress(user.address)}</div>
           <div className="text-lg font-semibold mt-2">
-            {balance} ETH
+            2.45 ETH
           </div>
+          {user.isConnectedToVault && (
+            <div className="text-xs text-primary mt-1">
+              ✓ Vault Connected
+            </div>
+          )}
         </div>
         
         <DropdownMenuItem onClick={copyAddress} className="cursor-pointer">
@@ -98,7 +87,7 @@ export function ConnectWallet({ className }: ConnectWalletProps) {
         </DropdownMenuItem>
         
         <DropdownMenuItem 
-          onClick={handleDisconnect} 
+          onClick={disconnectWallet} 
           className="cursor-pointer text-destructive focus:text-destructive"
         >
           <LogOut className="w-4 h-4 mr-2" />
