@@ -12,11 +12,15 @@ import {
   ArrowDownRight,
   Plus,
   Settings,
-  AlertCircle
+  AlertCircle,
+  Activity, 
+  Shield
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AnimatedText, CountingNumber, TypewriterText } from './AnimatedText';
 import { FloatingElements, PulsingOrb } from './FloatingElements';
+import { ScrollingText, GlitchText } from './ScrollingText';
+import { ParticleSystem, PulsatingDots, WaveEffect } from './InteractiveElements';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -49,22 +53,27 @@ export function Dashboard() {
     return (
       <div className="min-h-screen pt-20 pb-12 relative overflow-hidden">
         <FloatingElements />
+        <ParticleSystem />
         <PulsingOrb className="top-20 left-20" />
         <PulsingOrb className="bottom-20 right-20" />
+        <WaveEffect className="absolute inset-0 opacity-30" />
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center space-y-8">
             <div className="space-y-4">
-              <AlertCircle className="w-16 h-16 mx-auto text-primary floating-element" />
-              <h1 className="text-4xl font-bold text-slide-up">
-                <TypewriterText text="Vault Connection Required" />
+              <AlertCircle className="w-16 h-16 mx-auto text-primary floating-element wiggle" />
+              <h1 className="text-4xl font-bold text-slide-up font-orbitron">
+                <GlitchText text="Vault Connection Required" />
               </h1>
               <p className="text-xl text-muted-foreground text-slide-up">
-                Connect to a vault to access your dashboard and start earning yields
+                <TypewriterText text="Connect to a vault to access your dashboard and start earning yields" />
               </p>
+              <div className="mt-4">
+                <PulsatingDots />
+              </div>
             </div>
             
-            <Card className="glass-card max-w-md mx-auto p-8">
+            <Card className="glass-card max-w-md mx-auto p-8 hover:scale-105 transition-all duration-500">
               <div className="space-y-6">
                 <div className="text-center">
                   <h3 className="text-xl font-semibold mb-2">Get Started</h3>
@@ -74,10 +83,12 @@ export function Dashboard() {
                 </div>
                 
                 <div className="space-y-3">
-                  <Button className="w-full btn-gradient-primary" size="lg">
+                  <Button className="w-full btn-gradient-primary hover:scale-105 transition-all group" size="lg">
+                    <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
                     Create New Vault
                   </Button>
-                  <Button variant="outline" className="w-full" size="lg">
+                  <Button variant="outline" className="w-full hover:scale-105 transition-all glass-morphism" size="lg">
+                    <Shield className="w-4 h-4 mr-2" />
                     Connect to Existing Vault
                   </Button>
                 </div>
@@ -89,36 +100,54 @@ export function Dashboard() {
     );
   }
 
+  const scrollingTexts = ['Portfolio Growing', 'Yields Optimizing', 'Risk Managed', 'Profits Flowing'];
+  const liveUpdates = ['Live Market Data', 'Real-time Analytics', 'Active Monitoring', 'Smart Alerts'];
+
   return (
     <div className="min-h-screen pt-20 pb-12 relative overflow-hidden">
       <FloatingElements />
+      <ParticleSystem />
       <PulsingOrb className="top-20 left-20" />
       <PulsingOrb className="bottom-40 right-40" />
+      <WaveEffect className="absolute inset-0 opacity-20" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <div className="mb-8 text-slide-up">
-          <h1 className="text-3xl font-bold mb-2">
-            <AnimatedText 
-              texts={["Portfolio Dashboard", "Investment Hub", "Yield Management"]} 
-              className="bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent"
-            />
+      {/* Scrolling ticker at top */}
+      <div className="fixed top-16 left-0 right-0 z-50 bg-card/80 backdrop-blur-sm border-b border-primary/20">
+        <ScrollingText 
+          texts={liveUpdates}
+          className="text-sm text-primary font-mono py-2"
+        />
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-12">
+        {/* Enhanced Header */}
+        <div className="mb-8 text-slide-up text-center">
+          <h1 className="text-4xl font-bold mb-2 font-orbitron">
+            Welcome back, <GlitchText text="DeFi Pioneer" />
           </h1>
-          <p className="text-muted-foreground">Track your crypto investments and yields</p>
+          <p className="text-muted-foreground mb-4">
+            <TypewriterText text="Manage your portfolio and optimize your yields" />
+          </p>
+          <div className="flex justify-center items-center space-x-4">
+            <Activity className="w-4 h-4 text-primary animate-pulse" />
+            <ScrollingText texts={scrollingTexts} className="text-primary font-mono" />
+            <PulsatingDots />
+          </div>
         </div>
 
-        {/* Portfolio Overview */}
+        {/* Enhanced Portfolio Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Total Portfolio Value */}
-          <Card className="glass-card">
+          <Card className="glass-card hover:scale-105 transition-all duration-300 group relative overflow-hidden">
+            <WaveEffect className="absolute inset-0 opacity-10" />
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <DollarSign className="w-4 h-4" />
+                <DollarSign className="w-4 h-4 group-hover:text-primary transition-colors group-hover:bounce" />
                 Total Portfolio Value
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold mb-1">
+              <div className="text-2xl font-bold mb-1 font-orbitron text-glow">
                 <CountingNumber 
                   target={portfolioData.totalValue} 
                   prefix="$" 
@@ -136,46 +165,61 @@ export function Dashboard() {
                 </span>
                 <span className="text-muted-foreground">24h</span>
               </div>
+              <div className="mt-2">
+                <Shield className="w-3 h-3 text-green-400 inline mr-1" />
+                <span className="text-xs text-green-400">Secured</span>
+              </div>
             </CardContent>
           </Card>
 
           {/* Active Vaults */}
-          <Card className="glass-card">
+          <Card className="glass-card hover:scale-105 transition-all duration-300 group relative overflow-hidden">
+            <WaveEffect className="absolute inset-0 opacity-10" />
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <PieChart className="w-4 h-4" />
+                <PieChart className="w-4 h-4 group-hover:text-accent transition-colors group-hover:wiggle" />
                 Active Vaults
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold mb-1">
+              <div className="text-2xl font-bold mb-1 font-orbitron text-glow">
                 <CountingNumber 
                   target={portfolioData.vaults.length} 
                   className="text-primary"
                 />
               </div>
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Zap className="w-4 h-4" />
+                <Zap className="w-4 h-4 animate-pulse" />
                 <span>Earning yield</span>
+              </div>
+              <div className="mt-2">
+                <Activity className="w-3 h-3 text-yellow-400 inline mr-1 animate-pulse" />
+                <span className="text-xs text-yellow-400">Active</span>
               </div>
             </CardContent>
           </Card>
 
           {/* Average APY */}
-          <Card className="glass-card">
+          <Card className="glass-card hover:scale-105 transition-all duration-300 group relative overflow-hidden">
+            <WaveEffect className="absolute inset-0 opacity-10" />
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <TrendingUp className="w-4 h-4" />
+                <TrendingUp className="w-4 h-4 group-hover:text-green-400 transition-colors group-hover:bounce" />
                 Average APY
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold mb-1">
+              <div className="text-2xl font-bold mb-1 font-orbitron text-glow text-primary">
                 15.6%
               </div>
               <div className="flex items-center gap-1 text-sm text-success">
                 <ArrowUpRight className="w-4 h-4" />
                 <span>Above market</span>
+              </div>
+              <div className="mt-2 flex items-center">
+                <TrendingUp className="w-3 h-3 text-green-400 inline mr-1" />
+                <span className="text-xs text-green-400">Trending Up</span>
+                <PulsatingDots className="ml-2" />
               </div>
             </CardContent>
           </Card>

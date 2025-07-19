@@ -1,86 +1,106 @@
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Shield, Zap, TrendingUp } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Shield, Zap, TrendingUp, Users } from "lucide-react";
+import { AnimatedText, TypewriterText } from './AnimatedText';
+import { ScrollingText, MarqueeText, GlitchText } from './ScrollingText';
+import { ParticleSystem, FloatingStats, WaveEffect } from './InteractiveElements';
+import { FloatingElements } from './FloatingElements';
 
 interface HeroProps {
   onSectionChange?: (section: string) => void;
 }
 
 export function Hero({ onSectionChange }: HeroProps) {
+  const heroTexts = ['DeFi Revolution', 'Cross-Chain Trading', 'Smart Arbitrage', 'Yield Optimization'];
+  const marqueeText = 'CRYPTOVAULT • NEXT-GEN DEFI • CROSS-CHAIN TRADING • SMART ARBITRAGE • YIELD MAXIMIZATION';
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-3xl animate-spin" style={{ animationDuration: '20s' }} />
+    <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Enhanced animated background */}
+      <FloatingElements />
+      <ParticleSystem />
+      <FloatingStats />
+      
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-float morphing"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-float morphing" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-gradient-x"></div>
+        <WaveEffect className="absolute inset-0" />
+      </div>
+      
+      {/* Scrolling text at top */}
+      <div className="absolute top-4 left-0 right-0 z-10">
+        <MarqueeText 
+          text={marqueeText}
+          className="text-sm font-mono text-primary/60"
+          speed={30}
+        />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="max-w-4xl mx-auto">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-primary/20 mb-8">
-            <Zap className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">Next-Gen DeFi Platform</span>
-          </div>
+      <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
+        <Badge variant="outline" className="mb-6 text-primary border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors animate-pulse">
+          🚀 <AnimatedText texts={['Next-Gen DeFi', 'AI-Powered', 'Cross-Chain', 'Smart Trading']} />
+        </Badge>
+        
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 text-slide-up">
+          <GlitchText 
+            text="CryptoVault"
+            className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient-x font-orbitron text-glow"
+          />
+        </h1>
+        
+        <div className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-2xl mx-auto leading-relaxed">
+          <TypewriterText 
+            text="Maximize your crypto yields with AI-powered strategies"
+            speed={50}
+          />
+        </div>
+        
+        <div className="text-lg md:text-xl text-primary/80 mb-8">
+          <ScrollingText 
+            texts={heroTexts}
+            className="font-mono"
+          />
+        </div>
 
-          {/* Main heading */}
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-primary via-accent to-primary-glow bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%]">
-              Maximize Your
-            </span>
-            <br />
-            <span className="text-foreground">Crypto Yields</span>
-          </h1>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <Button 
+            size="lg" 
+            onClick={() => onSectionChange?.('dashboard')}
+            className="btn-gradient-primary group hover:scale-105 transition-all duration-300 bounce"
+          >
+            <Zap className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform" />
+            Launch App
+            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all hover:scale-105 glass-morphism"
+          >
+            <Shield className="mr-2 h-4 w-4" />
+            View Documentation
+          </Button>
+        </div>
 
-          {/* Description */}
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-            Leverage advanced AI-powered strategies, cross-chain arbitrage, and intelligent vault management 
-            to optimize your crypto portfolio returns.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Button 
-              variant="gradient" 
-              size="xl" 
-              className="w-full sm:w-auto"
-              onClick={() => onSectionChange?.('dashboard')}
+        {/* Enhanced feature cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { icon: Shield, title: "Secure Vaults", desc: "Military-grade security", color: "text-green-400" },
+            { icon: Zap, title: "Lightning Fast", desc: "Sub-second execution", color: "text-yellow-400" },
+            { icon: TrendingUp, title: "High Yields", desc: "Maximize your returns", color: "text-primary" },
+            { icon: Users, title: "Community", desc: "Join 10k+ traders", color: "text-accent" }
+          ].map((feature, index) => (
+            <div 
+              key={index} 
+              className="glass-card p-6 hover:bg-card/60 transition-all duration-300 group hover:scale-105 hover:rotate-1 cursor-pointer"
+              style={{ animationDelay: `${index * 0.2}s` }}
             >
-              Launch App
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-            <Button variant="glass" size="xl" className="w-full sm:w-auto">
-              View Documentation
-            </Button>
-          </div>
-
-          {/* Feature cards */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <Card className="glass-card p-6 hover:scale-105 transition-transform duration-300">
-              <Shield className="w-8 h-8 text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Secure Vaults</h3>
-              <p className="text-muted-foreground text-sm">
-                Battle-tested smart contracts with multi-signature security
-              </p>
-            </Card>
-
-            <Card className="glass-card p-6 hover:scale-105 transition-transform duration-300">
-              <TrendingUp className="w-8 h-8 text-accent mb-4" />
-              <h3 className="text-lg font-semibold mb-2">AI Strategies</h3>
-              <p className="text-muted-foreground text-sm">
-                Machine learning algorithms optimize yield farming strategies
-              </p>
-            </Card>
-
-            <Card className="glass-card p-6 hover:scale-105 transition-transform duration-300">
-              <Zap className="w-8 h-8 text-success mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Cross-Chain</h3>
-              <p className="text-muted-foreground text-sm">
-                Execute arbitrage across multiple blockchain networks
-              </p>
-            </Card>
-          </div>
+              <feature.icon className={`w-8 h-8 ${feature.color} mb-4 group-hover:scale-110 group-hover:wiggle transition-transform`} />
+              <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">{feature.title}</h3>
+              <p className="text-muted-foreground text-sm group-hover:text-foreground transition-colors">{feature.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

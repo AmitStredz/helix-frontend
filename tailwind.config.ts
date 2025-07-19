@@ -19,7 +19,9 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				inter: ['Inter', 'sans-serif'],
+				sans: ["Inter", "ui-sans-serif", "system-ui"],
+				mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular"],
+				orbitron: ["Orbitron", "monospace"],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
