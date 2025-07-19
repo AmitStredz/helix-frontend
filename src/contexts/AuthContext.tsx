@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { MetaMaskSDK } from '@metamask/sdk';
+import { toast } from "@/components/ui/use-toast";
+import { isAddress } from "ethers";
 
 interface User {
-  address: string;
+  address: string;z
   isConnectedToVault: boolean;
 }
 
@@ -47,6 +49,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (accounts && accounts.length > 0) {
         const address = accounts[0];
+        
+        // Validate BNB (Ethereum-format) address
+        if (!isAddress(address)) {
+          toast({
+            title: "Invalid Wallet Address",
+            description: "Please connect to a valid BNB account.",
+            variant: "destructive"
+          });
+          setIsConnecting(false);
+          return;
+        }
         
         // Call backend API to check vault connection (dummy implementation)
         const isConnectedToVault = await checkVaultConnectionAPI(address);
