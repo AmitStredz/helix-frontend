@@ -65,15 +65,11 @@ export function ConnectWallet({ className }: ConnectWalletProps) {
               <span className="text-xs text-success">Connected</span>
             </div>
           </div>
-          <div className="font-mono text-sm">{formatAddress(user.address)}</div>
+          <div className="font-mono text-sm">{user.address}</div>
+          <div className="text-xs text-muted-foreground mt-1">Network: {user.chainId === '0x38' ? 'BNB Smart Chain' : user.chainId}</div>
           <div className="text-lg font-semibold mt-2">
-            2.45 ETH
+            {user.balance} BNB
           </div>
-          {user.isConnectedToVault && (
-            <div className="text-xs text-primary mt-1">
-              ✓ Vault Connected
-            </div>
-          )}
         </div>
         
         <DropdownMenuItem onClick={copyAddress} className="cursor-pointer">

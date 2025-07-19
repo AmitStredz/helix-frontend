@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { MetaMaskSDK } from '@metamask/sdk';
 import { toast } from "@/components/ui/use-toast";
-import { isAddress } from "ethers";
+import { isAddress, formatEther, BrowserProvider } from "ethers";
 
 interface User {
   address: string;
   isConnectedToVault: boolean;
   chainId: string;
+  balance: string;
+  vaultConnected: boolean;
+  vaultAddress: string | null;
 }
 
 interface AuthContextType {
@@ -14,106 +17,95 @@ interface AuthContextType {
   isConnecting: boolean;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
-  checkVaultConnection: () => Promise<void>;
-  switchToBNBChain: () => Promise<void>;
+}
+
+interface VaultConnectionResult {
+  isConnected: boolean;
+  secondaryAddress: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // BNB Smart Chain configuration
-const BNB_CHAIN_CONFIG = {
-  chainId: '0x38', // 56 in decimal
-  chainName: 'BNB Smart Chain',
-  nativeCurrency: {
-    name: 'BNB',
-    symbol: 'BNB',
-    decimals: 18,
-  },
-  rpcUrls: ['https://bsc-dataseed.binance.org/'],
-  blockExplorerUrls: ['https://bscscan.com/'],
-};
+const BNB_CHAIN_ID = '0x38'; // 56 in decimal
+const BACKEND_API_URL = 'http://192.168.1.248:3000/api'; // Replace with your real backend URL
 
-const BACKEND_API_URL = 'https://api.cryptovault.demo'; // Dummy API URL
+// Real API call to check vault connection
+const checkVaultConnectionAPI = async (address: string, returnFullData = false): Promise<boolean | VaultConnectionResult> => {
+  if (!address) {
+    console.log("wallet address not found.");
+  }
+  try {
+    const response = await fetch(`${BACKEND_API_URL}/users/check?walletAddress=${address}`);
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    console.log("data: ", data);
+    if (returnFullData) return data.isConnected ? { isConnected: true, secondaryAddress: data.user.secondaryAddress } : { isConnected: false, secondaryAddress: null };
+    return !!data.isConnected;
+  } catch (error) {
+    console.error('API call failed:', error);
+    return returnFullData ? { isConnected: false, secondaryAddress: null } : false;
+  }
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [sdk, setSdk] = useState<MetaMaskSDK | null>(null);
 
+  // Initialize MetaMask SDK
   useEffect(() => {
-    const initSDK = () => {
-      const metaMaskSDK = new MetaMaskSDK({
-        dappMetadata: {
-          name: 'CryptoVault',
-          url: window.location.host,
-        },
-        // Remove infuraAPIKey as it's not needed for BNB Smart Chain
-      });
-      setSdk(metaMaskSDK);
-    };
-
-    initSDK();
+    const metaMaskSDK = new MetaMaskSDK({
+      dappMetadata: {
+        name: 'CryptoVault',
+        url: window.location.host,
+      },
+    });
+    setSdk(metaMaskSDK);
   }, []);
 
+  // Get current chain ID
   const getCurrentChainId = async (): Promise<string | null> => {
     if (!sdk?.getProvider()) return null;
-    
     try {
-      const chainId = await sdk.getProvider()?.request({ 
-        method: 'eth_chainId' 
-      }) as string;
-      return chainId;
+      return await sdk.getProvider()?.request({ method: 'eth_chainId' }) as string;
     } catch (error) {
       console.error('Failed to get chain ID:', error);
       return null;
     }
   };
 
-  const switchToBNBChain = async (): Promise<void> => {
-    if (!sdk?.getProvider()) return;
-
+  // Get wallet balance
+  const getBalance = async (address: string): Promise<string> => {
     try {
-      // First try to switch to BNB chain
-      await sdk.getProvider()?.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: BNB_CHAIN_CONFIG.chainId }],
-      });
-    } catch (switchError: any) {
-      // If the chain doesn't exist, add it
-      if (switchError.code === 4902) {
-        try {
-          await sdk.getProvider()?.request({
-            method: 'wallet_addEthereumChain',
-            params: [BNB_CHAIN_CONFIG],
-          });
-        } catch (addError) {
-          console.error('Failed to add BNB chain:', addError);
-          throw new Error('Failed to add BNB Smart Chain to wallet');
-        }
-      } else {
-        console.error('Failed to switch to BNB chain:', switchError);
-        throw new Error('Failed to switch to BNB Smart Chain');
-      }
+      const provider = new BrowserProvider(sdk!.getProvider());
+      const balance = await provider.getBalance(address);
+      return formatEther(balance);
+    } catch (error) {
+      console.error('Failed to fetch balance:', error);
+      return '0';
     }
   };
 
-  const validateBNBChain = async (): Promise<boolean> => {
-    const currentChainId = await getCurrentChainId();
-    return currentChainId === BNB_CHAIN_CONFIG.chainId;
+  // Check if on BNB chain
+  const isOnBNBChain = async (): Promise<boolean> => {
+    const chainId = await getCurrentChainId();
+    return chainId === BNB_CHAIN_ID;
   };
 
+  // Connect wallet
   const connectWallet = async () => {
     if (!sdk) {
       toast({
-        title: "Connection Error",
-        description: "MetaMask SDK not initialized. Please refresh the page.",
+        title: "Error",
+        description: "MetaMask not initialized",
         variant: "destructive"
       });
       return;
     }
-    
+
     setIsConnecting(true);
-    
+
     try {
       // Connect to MetaMask
       const accounts = await sdk.connect();
@@ -121,103 +113,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!accounts || accounts.length === 0) {
         toast({
           title: "Connection Failed",
-          description: "Make sure you are using BNB chain.",
+          description: "No accounts found",
           variant: "destructive"
         });
         return;
       }
 
       const address = accounts[0];
-      
-      // Validate address format
+
+      // Validate address
       if (!isAddress(address)) {
         toast({
-          title: "Invalid Wallet Address",
-          description: "Connected address is not valid. Please try again.",
+          title: "Invalid Address",
+          description: "Connected address is not valid",
           variant: "destructive"
         });
         return;
       }
 
-      // Check if we're on BNB Smart Chain
-      const isOnBNBChain = await validateBNBChain();
-      
-      if (!isOnBNBChain) {
-        // Show toast asking to switch to BNB chain
+      // Check if on BNB chain
+      if (!(await isOnBNBChain())) {
         toast({
           title: "Wrong Network",
-          description: "Please switch to BNB Smart Chain to continue.",
+          description: "Please connect to BNB Smart Chain",
           variant: "destructive"
         });
-
-        try {
-          await switchToBNBChain();
-          
-          // Verify the switch was successful
-          const isBNBAfterSwitch = await validateBNBChain();
-          if (!isBNBAfterSwitch) {
-            toast({
-              title: "Network Switch Failed",
-              description: "Failed to switch to BNB Smart Chain. Please switch manually.",
-              variant: "destructive"
-            });
-            return;
-          }
-
-          toast({
-            title: "Network Switched",
-            description: "Successfully switched to BNB Smart Chain.",
-            variant: "default"
-          });
-        } catch (error) {
-          console.error('Chain switch error:', error);
-          toast({
-            title: "Network Switch Failed",
-            description: "Please manually switch to BNB Smart Chain in MetaMask.",
-            variant: "destructive"
-          });
-          return;
-        }
+        return;
       }
 
-      // Get current chain ID for user object
-      const chainId = await getCurrentChainId() || BNB_CHAIN_CONFIG.chainId;
-      
-      // Check vault connection
-      const isConnectedToVault = await checkVaultConnectionAPI(address);
-      
+      // Get wallet data
+      const chainId = await getCurrentChainId() || BNB_CHAIN_ID;
+      const balance = await getBalance(address);
+
+      // Fetch vault connection status from backend
+      const vaultData = await checkVaultConnectionAPI(address, true);
+      let isConnectedToVault = false;
+      let vaultConnected = false;
+      let vaultAddress: string | null = null;
+      if (typeof vaultData === 'object' && vaultData !== null && 'isConnected' in vaultData) {
+        isConnectedToVault = !!vaultData.isConnected;
+        vaultConnected = !!vaultData.isConnected;
+        vaultAddress = vaultData.isConnected ? vaultData.secondaryAddress : null;
+      }
       const newUser: User = {
         address,
         isConnectedToVault,
-        chainId
+        chainId,
+        balance,
+        vaultConnected,
+        vaultAddress
       };
 
       setUser(newUser);
-      
-      // Store in localStorage for persistence
+
+      // Save to localStorage
       localStorage.setItem('wallet_address', address);
-      localStorage.setItem('wallet_chainId', chainId);
-      
+
       toast({
-        title: "Wallet Connected",
-        description: `Successfully connected to ${address.slice(0, 6)}...${address.slice(-4)}`,
+        title: "Connected",
+        description: `Wallet ${address.slice(0, 6)}...${address.slice(-4)} connected`,
         variant: "default"
       });
 
-    } catch (error: any) {
-      console.error('Failed to connect wallet:', error);
+    } catch (error: unknown) {
+      console.error('Connection failed:', error);
       
-      let errorMessage = "Failed to connect wallet. Please try again.";
-      
-      if (error.code === 4001) {
-        errorMessage = "Connection rejected by user.";
-      } else if (error.code === -32002) {
-        errorMessage = "Connection request is already pending. Please check MetaMask.";
+      let message = "Failed to connect wallet";
+      if (typeof error === "object" && error && "code" in error && (error as { code: number }).code === 4001) {
+        message = "Connection rejected by user";
+      } else if (typeof error === "object" && error && "code" in error && (error as { code: number }).code === -32002) {
+        message = "Connection request pending in MetaMask";
       }
-      
+
       toast({
         title: "Connection Failed",
-        description: errorMessage,
+        description: message,
         variant: "destructive"
       });
     } finally {
@@ -225,151 +195,94 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Disconnect wallet
   const disconnectWallet = () => {
     setUser(null);
     localStorage.removeItem('wallet_address');
-    localStorage.removeItem('wallet_chainId');
     
     toast({
-      title: "Wallet Disconnected",
-      description: "Your wallet has been disconnected.",
+      title: "Disconnected",
+      description: "Wallet disconnected",
       variant: "default"
     });
   };
 
-  const checkVaultConnection = async () => {
-    if (!user?.address) return;
-    
-    try {
-      const isConnectedToVault = await checkVaultConnectionAPI(user.address);
-      setUser(prev => prev ? { ...prev, isConnectedToVault } : null);
-    } catch (error) {
-      console.error('Failed to check vault connection:', error);
-      toast({
-        title: "Connection Check Failed",
-        description: "Failed to check vault connection status.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Dummy API call - replace with real backend integration
-  const checkVaultConnectionAPI = async (address: string): Promise<boolean> => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In production, make actual API call:
-      // const response = await fetch(`${BACKEND_API_URL}/vault/check/${address}`);
-      // const data = await response.json();
-      // return data.isConnected;
-      
-      // Dummy logic for demo
-      return Math.random() > 0.5;
-    } catch (error) {
-      console.error('API call failed:', error);
-      return false;
-    }
-  };
-
   // Check for existing connection on mount
   useEffect(() => {
-    const checkExistingConnection = async () => {
+    const checkConnection = async () => {
       const savedAddress = localStorage.getItem('wallet_address');
-      const savedChainId = localStorage.getItem('wallet_chainId');
       
       if (savedAddress && sdk) {
         try {
-          // Check if MetaMask still has this account connected
           const accounts = await sdk.getProvider()?.request({ 
             method: 'eth_accounts' 
           }) as string[];
           
           if (accounts && accounts.length > 0 && accounts[0] === savedAddress) {
-            // Verify we're still on BNB chain
-            const currentChainId = await getCurrentChainId();
-            
-            if (currentChainId === BNB_CHAIN_CONFIG.chainId) {
-              const isConnectedToVault = await checkVaultConnectionAPI(savedAddress);
-              setUser({ 
-                address: savedAddress, 
+            if (await isOnBNBChain()) {
+              const chainId = await getCurrentChainId() || BNB_CHAIN_ID;
+              const balance = await getBalance(savedAddress);
+              
+              // Fetch vault connection status from backend
+              const vaultData = await checkVaultConnectionAPI(savedAddress, true);
+              let isConnectedToVault = false;
+              let vaultConnected = false;
+              let vaultAddress: string | null = null;
+              if (typeof vaultData === 'object' && vaultData !== null && 'isConnected' in vaultData) {
+                isConnectedToVault = !!vaultData.isConnected;
+                vaultConnected = !!vaultData.isConnected;
+                vaultAddress = vaultData.isConnected ? vaultData.secondaryAddress : null;
+              }
+              setUser({
+                address: savedAddress,
                 isConnectedToVault,
-                chainId: currentChainId
+                chainId,
+                balance,
+                vaultConnected,
+                vaultAddress
               });
             } else {
-              // Wrong chain, clear stored data
               localStorage.removeItem('wallet_address');
-              localStorage.removeItem('wallet_chainId');
-              toast({
-                title: "Wrong Network",
-                description: "Please connect to BNB Smart Chain to restore your session.",
-                variant: "destructive"
-              });
             }
           } else {
-            // Account no longer connected, clear stored data
             localStorage.removeItem('wallet_address');
-            localStorage.removeItem('wallet_chainId');
           }
         } catch (error) {
-          console.error('Failed to check existing connection:', error);
+          console.error('Failed to restore connection:', error);
           localStorage.removeItem('wallet_address');
-          localStorage.removeItem('wallet_chainId');
         }
       }
     };
 
     if (sdk) {
-      checkExistingConnection();
+      checkConnection();
     }
   }, [sdk]);
 
-  // Listen for account and chain changes
+  // Listen for account changes
   useEffect(() => {
     if (!sdk?.getProvider()) return;
 
     const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
-        // User disconnected
+      if (accounts.length === 0 || (user && accounts[0] !== user.address)) {
         disconnectWallet();
-      } else if (user && accounts[0] !== user.address) {
-        // User switched accounts
-        disconnectWallet();
+      }
+    };
+
+    const handleChainChanged = (chainId: string) => {
+      if (user && chainId !== BNB_CHAIN_ID) {
         toast({
-          title: "Account Changed",
-          description: "Please reconnect with the new account.",
-          variant: "default"
+          title: "Wrong Network",
+          description: "Please switch to BNB Smart Chain",
+          variant: "destructive"
         });
+        disconnectWallet();
       }
     };
 
-    const handleChainChanged = async (chainId: string) => {
-      if (user) {
-        if (chainId !== BNB_CHAIN_CONFIG.chainId) {
-          // User switched away from BNB chain
-          toast({
-            title: "Wrong Network",
-            description: "Please switch back to BNB Smart Chain to continue using the app.",
-            variant: "destructive"
-          });
-          setUser(prev => prev ? { ...prev, chainId } : null);
-        } else {
-          // User switched back to BNB chain
-          setUser(prev => prev ? { ...prev, chainId } : null);
-          toast({
-            title: "Network Restored",
-            description: "You're now connected to BNB Smart Chain.",
-            variant: "default"
-          });
-        }
-      }
-    };
-
-    // Add event listeners
     sdk.getProvider()?.on('accountsChanged', handleAccountsChanged);
     sdk.getProvider()?.on('chainChanged', handleChainChanged);
 
-    // Cleanup
     return () => {
       sdk.getProvider()?.removeListener('accountsChanged', handleAccountsChanged);
       sdk.getProvider()?.removeListener('chainChanged', handleChainChanged);
@@ -381,9 +294,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       isConnecting,
       connectWallet,
-      disconnectWallet,
-      checkVaultConnection,
-      switchToBNBChain
+      disconnectWallet
     }}>
       {children}
     </AuthContext.Provider>

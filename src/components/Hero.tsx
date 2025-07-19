@@ -12,7 +12,7 @@ interface HeroProps {
 
 export function Hero({ onSectionChange }: HeroProps) {
   const heroTexts = ['DeFi Revolution', 'Cross-Chain Trading', 'Smart Arbitrage', 'Yield Optimization'];
-  const marqueeText = 'CRYPTOVAULT • NEXT-GEN DEFI • CROSS-CHAIN TRADING • SMART ARBITRAGE • YIELD MAXIMIZATION';
+  const marqueeText = 'HELIX • NEXT-GEN DEFI • CROSS-CHAIN TRADING • SMART ARBITRAGE • YIELD MAXIMIZATION';
 
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -44,7 +44,7 @@ export function Hero({ onSectionChange }: HeroProps) {
         
         <h1 className="text-5xl md:text-7xl font-bold mb-6 text-slide-up">
           <GlitchText 
-            text="CryptoVault"
+            text="Helix"
             className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient-x font-orbitron text-glow"
           />
         </h1>
@@ -67,7 +67,7 @@ export function Hero({ onSectionChange }: HeroProps) {
           <Button 
             size="lg" 
             onClick={() => onSectionChange?.('dashboard')}
-            className="btn-gradient-primary group hover:scale-105 transition-all duration-300 bounce"
+            className="btn-gradient-primary group hover:scale-105"
           >
             <Zap className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform" />
             Launch App

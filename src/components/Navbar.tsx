@@ -33,7 +33,7 @@ export function Navbar({
           {/* Logo */}
           <div
             className="flex items-center gap-2 cursor-pointer"
-            onClick={() => navigate("/")}
+            onClick={() => onSectionChange?.("")}
           >
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center pulse-glow">
               <Zap className="w-5 h-5 text-white" />
