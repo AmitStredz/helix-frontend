@@ -24,7 +24,7 @@
 +-------------------+        +-------------------+        +-------------------+
 ```
 
-![Helix Architecture](./helix_architecture.jpg)
+![Helix Architecture](./public/helix_architecture.jpg)
 
 - **Frontend**: User interface, wallet connection, vault management, QR code, and real-time updates
 - **Backend**: User/session management, vault creation, transaction orchestration, API for wallet operations
@@ -97,7 +97,7 @@ npm run dev # or yarn dev
 
 ## 🖼️ UI Preview
 
-![Helix UI Preview](./helix_UI.png)
+![Helix UI Preview](./public/helix_UI.png)
 
 ---
 
