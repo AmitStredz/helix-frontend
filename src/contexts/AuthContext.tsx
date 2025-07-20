@@ -27,8 +27,8 @@ interface VaultConnectionResult {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // BNB Smart Chain configuration
-const BNB_CHAIN_ID = '0x38'; // 56 in decimal
-const BACKEND_API_URL = 'http://192.168.1.248:3000/api'; // Replace with your real backend URL
+const BNB_CHAIN_ID = '0x61'; // 97 in decimal - BNB Smart Chain Testnet
+const BACKEND_API_URL = 'http://10.114.240.208:3000/api'; // Replace with your real backend URL
 
 // Real API call to check vault connection
 const checkVaultConnectionAPI = async (address: string, returnFullData = false): Promise<boolean | VaultConnectionResult> => {
@@ -135,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!(await isOnBNBChain())) {
         toast({
           title: "Wrong Network",
-          description: "Please connect to BNB Smart Chain",
+          description: "Please connect to BNB Smart Chain Testnet",
           variant: "destructive"
         });
         return;
@@ -212,7 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkConnection = async () => {
       const savedAddress = localStorage.getItem('wallet_address');
       
-      if (savedAddress && sdk) {
+      if (savedAddress && sdk) {  
         try {
           const accounts = await sdk.getProvider()?.request({ 
             method: 'eth_accounts' 
@@ -273,7 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user && chainId !== BNB_CHAIN_ID) {
         toast({
           title: "Wrong Network",
-          description: "Please switch to BNB Smart Chain",
+          description: "Please switch to BNB Smart Chain Testnet",
           variant: "destructive"
         });
         disconnectWallet();
