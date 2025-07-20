@@ -17,7 +17,8 @@
 
 ## 🖼️ UI Preview
 
-![Helix UI Preview](./public/helix_UI.png)(./public/helix_dashboard.png)
+![Helix UI Preview](./public/helix_UI.png)
+![Helix Dashboard Preview](./public/helix_architecture.png)
 
 ---
 
