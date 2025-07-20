@@ -1,6 +1,5 @@
 # Helix Frontend
 
-[Backend Repository](https://github.com/vagabond-0/backend-next-js.git) • [Smart Contract Source](https://github.com/JijoJohny/Helix-contract.git)
 - **Backend Repository**: [https://github.com/vagabond-0/backend-next-js.git](https://github.com/vagabond-0/backend-next-js.git)
 - **Smart Contract Repository**: [https://github.com/JijoJohny/Helix-contract.git](https://github.com/JijoJohny/Helix-contract.git)
 ---
