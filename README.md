@@ -15,6 +15,12 @@
 
 ---
 
+## 🖼️ UI Preview
+
+![Helix UI Preview](./public/helix_UI.png)
+
+---
+
 ## 🏗️ Architecture
 
 ```
@@ -92,12 +98,6 @@ npm run dev # or yarn dev
 - Enter amount and recipient address
 - Confirm withdrawal
 - View transaction hash and block number
-
----
-
-## 🖼️ UI Preview
-
-![Helix UI Preview](./public/helix_UI.png)
 
 ---
 
