@@ -20,7 +20,7 @@
 ```
 +-------------------+        +-------------------+        +-------------------+
 |    Frontend (UI)  | <----> |     Backend API   | <----> |   Smart Contracts |
-|  (React, Vite)    |        |  (Node.js/Express)|        |   (Solidity, BSC) |
+|  (ReactJs, Vite)  |        |       (NextJs)    |        |   (Solidity, BSC) |
 +-------------------+        +-------------------+        +-------------------+
 ```
 
